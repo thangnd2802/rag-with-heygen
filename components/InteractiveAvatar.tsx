@@ -412,7 +412,7 @@ export default function InteractiveAvatar() {
       if (response) {
         const textToRead = response.replace(/##\d+\$\$/g, "");
 
-        handleSpeak(textToRead);
+        // handleSpeak(textToRead); no need to use this when testing agent response
         setMessages((prev) => [
           ...prev,
           { id: prev.length + 1, text: textToRead, sender: "agent" },
