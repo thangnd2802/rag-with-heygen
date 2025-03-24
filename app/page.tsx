@@ -1,13 +1,146 @@
 "use client";
 
+import { useState } from "react";
+
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Divider,
+  Link,
+  Image,
+  Button,
+  Input,
+} from "@nextui-org/react";
+
 import InteractiveAvatar from "@/components/InteractiveAvatar";
+
 export default function App() {
+  const [agents, setAgents] = useState([
+    {
+      name: "Betr Agent",
+      id: "c04f9db0087a11f09a2e0242c0a86106",
+      image:
+        "https://img.freepik.com/free-photo/view-graphic-3d-robot_23-2150849173.jpg?t=st=1742802130~exp=1742805730~hmac=9efa03cc75b15fd966be920ae0f69761878fd23253938b03a57464888ac88e0e&w=740",
+      description: "Agent that can help understand about Betr company",
+    },
+    {
+      name: "Investment Advisor Agent",
+      id: "7b07d382086411f0a3990242c0a86106",
+      image:
+        "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg?t=st=1742802205~exp=1742805805~hmac=1d587adba94220ec3098fb8e778d511c0f06869c3e1c9c55820f1a7beb9fd15a&w=740",
+      description:
+        "An investment advisor agent that can help you with your investment",
+    },
+  ]);
+
+  const [agentId, setAgentId] = useState("");
+
+  const [keys, setKeys] = useState({
+    rag_api_key: "",
+    heygen_api_key: "",
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const onRagApiKeyChange = (value: string) => {
+    setKeys({ ...keys, rag_api_key: value });
+  };
+
+  const onHeygenApiKeyChange = (value: string) => {
+    setKeys({ ...keys, heygen_api_key: value });
+  };
+
+  const submitKeys = () => {
+    if (!keys.rag_api_key || !keys.heygen_api_key) {
+      return;
+    }
+    setIsSubmitted(true);
+  };
+
+  const chooseAgent = (id: string) => {
+    setAgentId(id);
+  };
 
   return (
     <div className="w-screen h-screen flex flex-col">
       <div className="w-[80%] max-w-[1400px] flex flex-col items-start justify-start gap-5 mx-auto pt-4 pb-20">
         <div className="w-full">
-          <InteractiveAvatar />
+          <div className="flex flex-wrap gap-5 mb-5">
+            {!isSubmitted ? (
+              <div className="flex flex-col gap-5">
+                <h1 className="text-3xl">Please enter your keys</h1>
+                <Input
+                  isRequired
+                  className="min-w-[400px]"
+                  label="Key 1"
+                  placeholder="Enter key 1"
+                  type="key1"
+                  onChange={(e) => onRagApiKeyChange(e.target.value)}
+                />
+                <Input
+                  isRequired
+                  className="min-w-[400px]"
+                  label="Key2"
+                  placeholder="Enter key 2"
+                  type="key2"
+                  onChange={(e) => onHeygenApiKeyChange(e.target.value)}
+                />
+                <Button
+                  className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
+                  disabled={!keys.rag_api_key || !keys.heygen_api_key}
+                  size="md"
+                  variant="shadow"
+                  onClick={submitKeys}
+                >
+                  Go
+                </Button>
+              </div>
+            ) : !agentId ? (
+              agents.map((agent) => (
+                <Card key={agent.id} className="max-w-[400px]">
+                  <CardHeader className="flex gap-3">
+                    <Image
+                      alt="heroui logo"
+                      height={40}
+                      radius="sm"
+                      src={agent.image}
+                      width={40}
+                    />
+                    <div className="flex flex-col">
+                      <p className="text-md">{agent.name}</p>
+                    </div>
+                  </CardHeader>
+                  <Divider />
+                  <CardBody>
+                    <p>{agent.description}</p>
+                  </CardBody>
+                  <Divider />
+                  <CardFooter>
+                    <Button
+                      className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
+                      size="md"
+                      variant="shadow"
+                      onClick={() => chooseAgent(agent.id)}
+                    >
+                      Start Chat
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <div className="w-full flex flex-col gap-5">
+                <div>
+                  <Button
+                    color="secondary"
+                    onClick={() => setAgentId("")}
+                  >{`< Back`}</Button>
+                </div>
+                <InteractiveAvatar agentId={agentId} keys={keys} />
+              </div>
+            )}
+          </div>
+          {/* <InteractiveAvatar /> */}
         </div>
       </div>
     </div>

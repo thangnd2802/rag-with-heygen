@@ -41,13 +41,15 @@ interface IMessage {
   sender: "user" | "agent";
 }
 
-export default function InteractiveAvatar() {
+export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api_key: string, heygen_api_key: string} }) {
+  const { agentId, keys } = props;
+
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
   const [stream, setStream] = useState<MediaStream>();
   const [debug, setDebug] = useState<string>();
-  const [knowledgeId, setKnowledgeId] = useState<string>("");
+  // const [knowledgeId, setKnowledgeId] = useState<string>("");
   const [avatarId, setAvatarId] = useState<string>("SilasHR_public");
   const [language, setLanguage] = useState<string>("en");
 
@@ -55,15 +57,15 @@ export default function InteractiveAvatar() {
   const [text, setText] = useState<string>("");
   const mediaStream = useRef<HTMLVideoElement>(null);
   const avatar = useRef<StreamingAvatar | null>(null);
-  const [chatMode, setChatMode] = useState("text_mode");
-  const [isUserTalking, setIsUserTalking] = useState(false);
+  // const [chatMode, setChatMode] = useState("text_mode");
+  // const [isUserTalking, setIsUserTalking] = useState(false);
   const [ragflowSessionId, setRagflowSessionId] = useState<string>("");
 
   function ragflowConfig() {
     return {
       url: process.env.NEXT_PUBLIC_RAGFLOW_API_URL,
-      api_key: process.env.NEXT_PUBLIC_RAGFLOW_API_KEY,
-      agent_id: process.env.NEXT_PUBLIC_RAGFLOW_AGENT_ID,
+      api_key: keys.rag_api_key, //process.env.NEXT_PUBLIC_RAGFLOW_API_KEY,
+      agent_id: agentId, //process.env.NEXT_PUBLIC_RAGFLOW_AGENT_ID,
     };
   }
 
@@ -73,16 +75,36 @@ export default function InteractiveAvatar() {
 
   async function fetchAccessToken() {
     try {
-      const response = await fetch("/api/get-access-token", {
+      if (!keys.heygen_api_key) {
+        console.error("Heygen API key not found");
+        alert("Heygen API key not found");
+
+        return;
+      }
+
+      const apiUrl = baseApiUrl();
+
+      // const response = await fetch("/api/get-access-token", {
+      //   method: "POST",
+      // });
+      // const token = await response.text();
+
+      const res = await fetch(`${apiUrl}/v1/streaming.create_token`, {
         method: "POST",
+        headers: {
+          "x-api-key": keys.heygen_api_key,
+        },
       });
-      const token = await response.text();
+
+      const data = await res.json();
+      const token = data.data.token;
 
       console.log("Access Token:", token); // Log the token to verify
 
       return token;
     } catch (error) {
       console.error("Error fetching access token:", error);
+      alert("Error fetching access token or missing API key");
     }
 
     return "";
@@ -161,6 +183,12 @@ export default function InteractiveAvatar() {
   async function startSession() {
     setIsLoadingSession(true);
     const newToken = await fetchAccessToken();
+
+    if (!newToken) {
+      setIsLoadingSession(false);
+
+      return;
+    }
 
     avatar.current = new StreamingAvatar({
       token: newToken,
@@ -412,7 +440,10 @@ export default function InteractiveAvatar() {
       if (response) {
         const textToRead = response.replace(/##\d+\$\$/g, "");
 
-        // handleSpeak(textToRead); no need to use this when testing agent response
+        if (isSessionLoaded) {
+          handleSpeak(textToRead);
+        }
+
         setMessages((prev) => [
           ...prev,
           { id: prev.length + 1, text: textToRead, sender: "agent" },
@@ -473,53 +504,6 @@ export default function InteractiveAvatar() {
               </div>
             ) : !isLoadingSession ? (
               <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
-                {/* <div className="flex flex-col gap-2 w-full">
-                <p className="text-sm font-medium leading-none">
-                  Custom Knowledge ID (optional)
-                </p>
-                <Input
-                  placeholder="Enter a custom knowledge ID"
-                  value={knowledgeId}
-                  onChange={(e) => setKnowledgeId(e.target.value)}
-                />
-                <p className="text-sm font-medium leading-none">
-                  Custom Avatar ID (optional)
-                </p>
-                <Input
-                  placeholder="Enter a custom avatar ID"
-                  value={avatarId}
-                  onChange={(e) => setAvatarId(e.target.value)}
-                />
-                <Select
-                  placeholder="Or select one from these example avatars"
-                  size="md"
-                  onChange={(e) => {
-                    setAvatarId(e.target.value);
-                  }}
-                >
-                  {AVATARS.map((avatar) => (
-                    <SelectItem
-                      key={avatar.avatar_id}
-                      textValue={avatar.avatar_id}
-                    >
-                      {avatar.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Select language"
-                  placeholder="Select language"
-                  className="max-w-xs"
-                  selectedKeys={[language]}
-                  onChange={(e) => {
-                    setLanguage(e.target.value);
-                  }}
-                >
-                  {STT_LANGUAGE_LIST.map((lang) => (
-                    <SelectItem key={lang.key}>{lang.label}</SelectItem>
-                  ))}
-                </Select>
-              </div> */}
                 <Button
                   className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
                   size="md"
