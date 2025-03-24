@@ -41,20 +41,23 @@ interface IMessage {
   sender: "user" | "agent";
 }
 
-export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api_key: string, heygen_api_key: string} }) {
-  const { agentId, keys } = props;
+export default function InteractiveAvatar(props: {
+  agentId: any;
+  ragApiKey: string;
+}) {
+  const { agentId, ragApiKey } = props;
 
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
-  const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
   const [stream, setStream] = useState<MediaStream>();
   const [debug, setDebug] = useState<string>();
+  const [heygenApiKey, setHeygenApiKey] = useState<string>("");
   // const [knowledgeId, setKnowledgeId] = useState<string>("");
-  const [avatarId, setAvatarId] = useState<string>("SilasHR_public");
-  const [language, setLanguage] = useState<string>("en");
+  const avatarId = "SilasHR_public";
+  const language = "en";
 
-  const [data, setData] = useState<StartAvatarResponse>();
-  const [text, setText] = useState<string>("");
+  // const [data, setData] = useState<StartAvatarResponse>();
+  // const [text, setText] = useState<string>("");
   const mediaStream = useRef<HTMLVideoElement>(null);
   const avatar = useRef<StreamingAvatar | null>(null);
   // const [chatMode, setChatMode] = useState("text_mode");
@@ -64,7 +67,7 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
   function ragflowConfig() {
     return {
       url: process.env.NEXT_PUBLIC_RAGFLOW_API_URL,
-      api_key: keys.rag_api_key, //process.env.NEXT_PUBLIC_RAGFLOW_API_KEY,
+      api_key: ragApiKey, //process.env.NEXT_PUBLIC_RAGFLOW_API_KEY,
       agent_id: agentId, //process.env.NEXT_PUBLIC_RAGFLOW_AGENT_ID,
     };
   }
@@ -75,7 +78,7 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
 
   async function fetchAccessToken() {
     try {
-      if (!keys.heygen_api_key) {
+      if (!heygenApiKey) {
         console.error("Heygen API key not found");
         alert("Heygen API key not found");
 
@@ -92,7 +95,7 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
       const res = await fetch(`${apiUrl}/v1/streaming.create_token`, {
         method: "POST",
         headers: {
-          "x-api-key": keys.heygen_api_key,
+          "x-api-key": heygenApiKey,
         },
       });
 
@@ -235,7 +238,7 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
         disableIdleTimeout: true,
       });
 
-      setData(res);
+      // setData(res);
       // default to voice mode
       // await avatar.current?.startVoiceChat({
       //   useSilencePrompt: false,
@@ -250,7 +253,6 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
   }
 
   async function handleSpeak(textNeedToSpeak: string) {
-    setIsLoadingRepeat(true);
     if (!avatar.current) {
       setDebug("Avatar API not initialized");
 
@@ -266,7 +268,6 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
       .catch((e) => {
         setDebug(e.message);
       });
-    setIsLoadingRepeat(false);
   }
 
   // async function handleInterrupt() {
@@ -297,15 +298,15 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
   //   setChatMode(v);
   // });
 
-  const previousText = usePrevious(text);
+  // const previousText = usePrevious(text);
 
-  useEffect(() => {
-    if (!previousText && text) {
-      avatar.current?.startListening();
-    } else if (previousText && !text) {
-      avatar?.current?.stopListening();
-    }
-  }, [text, previousText]);
+  // useEffect(() => {
+  //   if (!previousText && text) {
+  //     avatar.current?.startListening();
+  //   } else if (previousText && !text) {
+  //     avatar?.current?.stopListening();
+  //   }
+  // }, [text, previousText]);
 
   useEffect(() => {
     return () => {
@@ -323,7 +324,7 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
     }
   }, [mediaStream, stream]);
 
-  const { transcript, listening, resetTranscript, isMicrophoneAvailable } =
+  const { transcript, resetTranscript, isMicrophoneAvailable } =
     useSpeechRecognition();
   const [inputValue, setInputValue] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -504,8 +505,18 @@ export default function InteractiveAvatar(props: { agentId: any, keys: { rag_api
               </div>
             ) : !isLoadingSession ? (
               <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
+                <Input
+                  isRequired
+                  className="min-w-[400px]"
+                  label="Avatar Key"
+                  placeholder="Enter avatar key"
+                  type="key"
+                  value={heygenApiKey}
+                  onChange={(e) => setHeygenApiKey(e.target.value)}
+                />
                 <Button
-                  className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
+                  className={`bg-gradient-to-tr ${heygenApiKey ? "from-indigo-500 to-indigo-300 w-full text-white" : "bg-gray-300 text-gray-500"}`}
+                  disabled={!heygenApiKey}
                   size="md"
                   variant="shadow"
                   onClick={startSession}

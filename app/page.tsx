@@ -37,22 +37,19 @@ export default function App() {
 
   const [agentId, setAgentId] = useState("");
 
-  const [keys, setKeys] = useState({
-    rag_api_key: "",
-    heygen_api_key: "",
-  });
+  const [ragApikey, setRagApiKey] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const onRagApiKeyChange = (value: string) => {
-    setKeys({ ...keys, rag_api_key: value });
+    setRagApiKey(value);
   };
 
-  const onHeygenApiKeyChange = (value: string) => {
-    setKeys({ ...keys, heygen_api_key: value });
-  };
+  // const onHeygenApiKeyChange = (value: string) => {
+  //   setKeys({ ...keys, heygen_api_key: value });
+  // };
 
   const submitKeys = () => {
-    if (!keys.rag_api_key || !keys.heygen_api_key) {
+    if (!ragApikey) {
       return;
     }
     setIsSubmitted(true);
@@ -73,22 +70,24 @@ export default function App() {
                 <Input
                   isRequired
                   className="min-w-[400px]"
-                  label="Key 1"
-                  placeholder="Enter key 1"
-                  type="key1"
-                  onChange={(e) => onRagApiKeyChange(e.target.value)}
+                  label="Agent Key"
+                  placeholder="Enter agent key"
+                  type="key"
+                  onChange={(e) =>
+                    onRagApiKeyChange("ragflow-" + e.target.value)
+                  }
                 />
-                <Input
+                {/* <Input
                   isRequired
                   className="min-w-[400px]"
                   label="Key2"
                   placeholder="Enter key 2"
                   type="key2"
                   onChange={(e) => onHeygenApiKeyChange(e.target.value)}
-                />
+                /> */}
                 <Button
-                  className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
-                  disabled={!keys.rag_api_key || !keys.heygen_api_key}
+                  className={`bg-gradient-to-tr rounded-lg ${ragApikey ? "from-indigo-500 to-indigo-300  text-white" : "bg-gray-300 text-gray-500"}`}
+                  disabled={!ragApikey}
                   size="md"
                   variant="shadow"
                   onClick={submitKeys}
@@ -136,7 +135,7 @@ export default function App() {
                     onClick={() => setAgentId("")}
                   >{`< Back`}</Button>
                 </div>
-                <InteractiveAvatar agentId={agentId} keys={keys} />
+                <InteractiveAvatar agentId={agentId} ragApiKey={ragApikey} />
               </div>
             )}
           </div>
