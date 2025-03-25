@@ -20,14 +20,14 @@ export default function App() {
   const [agents, setAgents] = useState([
     {
       name: "Betr Agent",
-      id: "c04f9db0087a11f09a2e0242c0a86106",
+      id: process.env.NEXT_PUBLIC_RAGFLOW_AGENT_ID_BETR as string,
       image:
         "https://img.freepik.com/free-photo/view-graphic-3d-robot_23-2150849173.jpg?t=st=1742802130~exp=1742805730~hmac=9efa03cc75b15fd966be920ae0f69761878fd23253938b03a57464888ac88e0e&w=740",
       description: "Agent that can help understand about Betr company",
     },
     {
       name: "Investment Advisor Agent",
-      id: "7b07d382086411f0a3990242c0a86106",
+      id: process.env.NEXT_PUBLIC_RAGFLOW_AGENT_ID_ADVISOR as string,
       image:
         "https://img.freepik.com/free-vector/ai-technology-robot-cyborg-illustrations_24640-134419.jpg?t=st=1742802205~exp=1742805805~hmac=1d587adba94220ec3098fb8e778d511c0f06869c3e1c9c55820f1a7beb9fd15a&w=740",
       description:
