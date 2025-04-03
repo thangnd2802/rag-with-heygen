@@ -37,23 +37,24 @@ export default function App() {
 
   const [agentId, setAgentId] = useState("");
 
-  const [ragApikey, setRagApiKey] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  // const [ragApikey, setRagApiKey] = useState("");
+  const ragApikey = "NlZDdhODg4MDk0ZjExZjBhN2NiMDI0Mm";
+  const [isSubmitted, setIsSubmitted] = useState(true);
 
-  const onRagApiKeyChange = (value: string) => {
-    setRagApiKey(value);
-  };
+  // const onRagApiKeyChange = (value: string) => {
+  //   setRagApiKey(value);
+  // };
 
   // const onHeygenApiKeyChange = (value: string) => {
   //   setKeys({ ...keys, heygen_api_key: value });
   // };
 
-  const submitKeys = () => {
-    if (!ragApikey) {
-      return;
-    }
-    setIsSubmitted(true);
-  };
+  // const submitKeys = () => {
+  //   if (!ragApikey) {
+  //     return;
+  //   }
+  //   setIsSubmitted(true);
+  // };
 
   const chooseAgent = (id: string) => {
     setAgentId(id);
@@ -73,9 +74,9 @@ export default function App() {
                   label="Agent Key"
                   placeholder="Enter agent key"
                   type="key"
-                  onChange={(e) =>
-                    onRagApiKeyChange("ragflow-" + e.target.value)
-                  }
+                  // onChange={(e) =>
+                  //   onRagApiKeyChange("ragflow-" + e.target.value)
+                  // }
                 />
                 {/* <Input
                   isRequired
@@ -84,7 +85,7 @@ export default function App() {
                   placeholder="Enter key 2"
                   type="key2"
                   onChange={(e) => onHeygenApiKeyChange(e.target.value)}
-                /> */}
+                /> 
                 <Button
                   className={`bg-gradient-to-tr rounded-lg ${ragApikey ? "from-indigo-500 to-indigo-300  text-white" : "bg-gray-300 text-gray-500"}`}
                   disabled={!ragApikey}
@@ -94,6 +95,7 @@ export default function App() {
                 >
                   Go
                 </Button>
+                */}
               </div>
             ) : !agentId ? (
               agents.map((agent) => (

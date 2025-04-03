@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import type { StartAvatarResponse } from "@heygen/streaming-avatar";
+// import type { StartAvatarResponse } from "@heygen/streaming-avatar";
 
 import StreamingAvatar, {
   AvatarQuality,
@@ -18,22 +18,31 @@ import {
   // Select,
   // SelectItem,
   Spinner,
-  Chip,
-  Tabs,
-  Tab,
+  // Chip,
+  // Tabs,
+  // Tab,
   Input,
 } from "@nextui-org/react";
 import { useEffect, useRef, useState } from "react";
-import { useMemoizedFn, usePrevious } from "ahooks";
+// import { useMemoizedFn, usePrevious } from "ahooks";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { Mic, MicOff } from "lucide-react";
 
-import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
+// import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 // import { headers } from "next/headers";
 
 // import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
+const heygenKeys = [
+  "MTFkOGRiNGM4NjdlNDQ3NGE4ZDdhN2Q0YjBhMzllY2MtMTc0Mjc4ODQ3NA==",
+  "YTI0MWRlOWFhN2E3NGU0NDg3ZDQ3ZDhiMjNjNTM5Y2UtMTc0Mjg4OTIzMA==",
+  "NTRiZGU3ZGQwYWExNDU2MGI5MGZkOWU5MjViNWM5YmMtMTc0Mjg4ODU1Nw==",
+  "NjAyOTNmNmIwYmY5NDgwODlmMDVhMDU3NGZiMGIzZWEtMTc0Mjg5NjU2Mw==",
+  "MWE3MDJhN2UxMThmNDJmNDgyODE1YWQ1NzA5YThmMzYtMTc0Mjg5NjY5MQ==",
+  "ZTVhNjc4MzQ2ZDc0NGJkZmE5OTgwMzRlM2Y5OWNkZjUtMTc0Mjg5Njg0NQ==",
+  "ZTcyYTkxNmM4M2QzNGM3YjgyMzNmYzk1YWNmOGNhYTAtMTc0Mjg5Njk5Nw==",
+]
 
 interface IMessage {
   id: number;
@@ -51,7 +60,7 @@ export default function InteractiveAvatar(props: {
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [stream, setStream] = useState<MediaStream>();
   const [debug, setDebug] = useState<string>();
-  const [heygenApiKey, setHeygenApiKey] = useState<string>("");
+  // const [heygenApiKey, setHeygenApiKey] = useState<string>("");
   // const [knowledgeId, setKnowledgeId] = useState<string>("");
   const avatarId = "SilasHR_public";
   const language = "en";
@@ -78,7 +87,7 @@ export default function InteractiveAvatar(props: {
 
   async function fetchAccessToken() {
     try {
-      if (!heygenApiKey) {
+      if (heygenKeys.length === 0) {
         console.error("Heygen API key not found");
         alert("Heygen API key not found");
 
@@ -87,24 +96,29 @@ export default function InteractiveAvatar(props: {
 
       const apiUrl = baseApiUrl();
 
-      // const response = await fetch("/api/get-access-token", {
-      //   method: "POST",
-      // });
-      // const token = await response.text();
+      let isGetKey = false;
+      let access_token = "";
+      let index = 0;
 
-      const res = await fetch(`${apiUrl}/v1/streaming.create_token`, {
-        method: "POST",
-        headers: {
-          "x-api-key": heygenApiKey,
-        },
-      });
+      while (!isGetKey) {
+        const res = await fetch(`${apiUrl}/v1/streaming.create_token`, {
+          method: "POST",
+          headers: {
+            "x-api-key": heygenKeys[index],
+          },
+        });
 
-      const data = await res.json();
-      const token = data.data.token;
+        if (res.status === 200) {
+          const data = await res.json();
 
-      console.log("Access Token:", token); // Log the token to verify
+          access_token = data.data.token;
+          isGetKey = true;
+        }
 
-      return token;
+        index++;
+      }
+
+      return access_token;
     } catch (error) {
       console.error("Error fetching access token:", error);
       alert("Error fetching access token or missing API key");
@@ -211,14 +225,6 @@ export default function InteractiveAvatar(props: {
       console.log(">>>>> Stream ready:", event.detail);
       setStream(event.detail);
     });
-    // avatar.current?.on(StreamingEvents.USER_START, (event) => {
-    //   console.log(">>>>> User started talking:", event);
-    //   setIsUserTalking(true);
-    // });
-    // avatar.current?.on(StreamingEvents.USER_STOP, (event) => {
-    //   console.log(">>>>> User stopped talking:", event);
-    //   setIsUserTalking(false);
-    // });
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.Low,
@@ -238,12 +244,6 @@ export default function InteractiveAvatar(props: {
         disableIdleTimeout: true,
       });
 
-      // setData(res);
-      // default to voice mode
-      // await avatar.current?.startVoiceChat({
-      //   useSilencePrompt: false,
-      // });
-      // setChatMode("voice_mode");
       setIsSessionLoaded(true);
     } catch (error) {
       console.error("Error starting avatar session:", error);
@@ -270,45 +270,14 @@ export default function InteractiveAvatar(props: {
       });
   }
 
-  // async function handleInterrupt() {
-  //   if (!avatar.current) {
-  //     setDebug("Avatar API not initialized");
-
-  //     return;
-  //   }
-  //   await avatar.current.interrupt().catch((e) => {
-  //     setDebug(e.message);
-  //   });
-  // }
-
   async function endSession() {
     await avatar.current?.stopAvatar();
     setStream(undefined);
   }
 
-  // const handleChangeChatMode = useMemoizedFn(async (v) => {
-  //   if (v === chatMode) {
-  //     return;
-  //   }
-  //   if (v === "text_mode") {
-  //     avatar.current?.closeVoiceChat();
-  //   } else {
-  //     await avatar.current?.startVoiceChat();
-  //   }
-  //   setChatMode(v);
-  // });
-
-  // const previousText = usePrevious(text);
-
-  // useEffect(() => {
-  //   if (!previousText && text) {
-  //     avatar.current?.startListening();
-  //   } else if (previousText && !text) {
-  //     avatar?.current?.stopListening();
-  //   }
-  // }, [text, previousText]);
-
   useEffect(() => {
+    startSession();
+
     return () => {
       endSession();
     };
@@ -504,26 +473,27 @@ export default function InteractiveAvatar(props: {
                 </div>
               </div>
             ) : !isLoadingSession ? (
-              <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
-                <Input
-                  isRequired
-                  className="min-w-[400px]"
-                  label="Avatar Key"
-                  placeholder="Enter avatar key"
-                  type="key"
-                  value={heygenApiKey}
-                  onChange={(e) => setHeygenApiKey(e.target.value)}
-                />
-                <Button
-                  className={`bg-gradient-to-tr ${heygenApiKey ? "from-indigo-500 to-indigo-300 w-full text-white" : "bg-gray-300 text-gray-500"}`}
-                  disabled={!heygenApiKey}
-                  size="md"
-                  variant="shadow"
-                  onClick={startSession}
-                >
-                  Start conversation
-                </Button>
-              </div>
+              // <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
+              //   <Input
+              //     isRequired
+              //     className="min-w-[400px]"
+              //     label="Avatar Key"
+              //     placeholder="Enter avatar key"
+              //     type="key"
+              //     value={heygenApiKey}
+              //     onChange={(e) => setHeygenApiKey(e.target.value)}
+              //   />
+              //   <Button
+              //     className={`bg-gradient-to-tr ${heygenApiKey ? "from-indigo-500 to-indigo-300 w-full text-white" : "bg-gray-300 text-gray-500"}`}
+              //     disabled={!heygenApiKey}
+              //     size="md"
+              //     variant="shadow"
+              //     onClick={startSession}
+              //   >
+              //     Start conversation
+              //   </Button>
+              // </div>
+              <div />
             ) : (
               <Spinner color="default" size="lg" />
             )}
