@@ -38,7 +38,7 @@ export default function App() {
   const [agentId, setAgentId] = useState("");
 
   // const [ragApikey, setRagApiKey] = useState("");
-  const ragApikey = "NlZDdhODg4MDk0ZjExZjBhN2NiMDI0Mm";
+  const ragApikey = "ragflow-NlZDdhODg4MDk0ZjExZjBhN2NiMDI0Mm";
   const [isSubmitted, setIsSubmitted] = useState(true);
 
   // const onRagApiKeyChange = (value: string) => {
